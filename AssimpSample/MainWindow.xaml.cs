@@ -15,14 +15,14 @@ using System.Windows.Navigation;
 using SharpGL.SceneGraph;
 using SharpGL;
 using Microsoft.Win32;
-
+using System.ComponentModel;
 
 namespace AssimpSample
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         #region Atributi
 
@@ -31,7 +31,38 @@ namespace AssimpSample
         /// </summary>
         World m_world = null;
 
+        private double m_diskOffsetY;
+        private double m_diskOffsetZ;
+
         #endregion Atributi
+
+        public double DiskYOffset
+        {
+            get
+            {
+                return m_world.DiskOffsetY;
+            }
+            set 
+            {
+                m_world.DiskOffsetY = value;
+                m_diskOffsetY = value;
+                OnPropertyChanged("DiskYOffset");
+            }
+        }
+
+        public double DiskZOffset
+        {
+            get
+            {
+                return m_world.DiskOffsetZ;
+            }
+            set
+            {
+                m_world.DiskOffsetZ = value;
+                m_diskOffsetZ = value;
+                OnPropertyChanged("DiskZOffset");
+            }
+        }
 
         #region Konstruktori
 
@@ -131,5 +162,35 @@ namespace AssimpSample
         {
             m_world.Resize(openGLControl.OpenGL, (int)openGLControl.ActualWidth, (int)openGLControl.ActualHeight);
         }
+
+        private void IncreaseDiskY(object sender, RoutedEventArgs e)
+        {
+            DiskYOffset += 0.1;
+        }
+
+        private void DereaseDiskY(object sender, RoutedEventArgs e)
+        {
+            DiskYOffset -= 0.1;
+        }
+
+        private void IncreaseDiskZ(object sender, RoutedEventArgs e)
+        {
+            DiskZOffset += 0.1;
+        }
+
+        private void DecreaseDiskZ(object sender, RoutedEventArgs e)
+        {
+            DiskZOffset -= 0.1;
+        }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+        #endregion
     }
 }

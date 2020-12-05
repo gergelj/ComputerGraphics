@@ -57,6 +57,8 @@ namespace AssimpSample
         /// </summary>
         private int m_height;
 
+        private double m_onTableHeightY = -1.5;
+
         /// <summary>
         /// Field of view
         /// </summary>
@@ -76,8 +78,11 @@ namespace AssimpSample
         private float m_upY = 1.0f;
         private float m_upZ = 0.0f;
 
-        Grid grid;
         private Cube cube;
+        private Disk disk;
+
+        private double m_diskOffsetY;
+        private double m_diskOffsetZ;
 
         #endregion Atributi
 
@@ -137,6 +142,18 @@ namespace AssimpSample
             set { m_height = value; }
         }
 
+        public double DiskOffsetY
+        {
+            get { return m_diskOffsetY; }
+            set { m_diskOffsetY = value; }
+        }
+
+        public double DiskOffsetZ
+        {
+            get { return m_diskOffsetZ; }
+            set { m_diskOffsetZ = value; }
+        }
+
         #endregion Properties
 
         #region Konstruktori
@@ -173,10 +190,6 @@ namespace AssimpSample
 
             gl.LookAt(m_eyeX, m_eyeY, m_eyeZ, m_centerX, m_centerY, m_centerZ, m_upX, m_upY, m_upZ);
             gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            //gl.Color(0f, 1f, 0f);
-            // Model sencenja na flat (konstantno)
-            //gl.ShadeModel(OpenGL.GL_FLAT);
-            //gl.Enable(OpenGL.GL_DEPTH_TEST);
 
             float[] lineWidthRange = new float[2];
             float[] lineWidthGranularity = new float[1];
@@ -185,12 +198,16 @@ namespace AssimpSample
             float lineWidth = lineWidthRange[0];
             gl.LineWidth(lineWidth);
 
-
-
             m_scene.LoadScene();
             m_scene.Initialize();
-            //grid = new Grid();
-            //cube = new Cube();
+
+            cube = new Cube();
+            disk = new Disk();
+            disk.Loops = 120;
+            disk.Slices = 50;
+            disk.InnerRadius = 0.2f;
+            disk.OuterRadius = 1.0f;
+
         }
 
         /// <summary>
@@ -214,6 +231,7 @@ namespace AssimpSample
             gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
 
             gl.PushMatrix();
+            gl.Translate(1, 0, 0);
             gl.Rotate(90, 1, 0, 0);
             gl.Rotate(-90, 0, 0, 1);
             gl.Scale(5, 5, 5);
@@ -221,6 +239,30 @@ namespace AssimpSample
             gl.PopMatrix();
 
             //TODO: Draw table, podloga i disk
+            gl.PushMatrix();
+            gl.Scale(6, 2.0, 3.5);
+            gl.Translate(0, m_onTableHeightY, 0);
+
+            cube.Render(gl, RenderMode.Render);
+
+            gl.Color(1.0, 0.0, 0.0);
+            gl.Begin(OpenGL.GL_QUADS);
+            gl.Vertex(-0.7, 1, -0.7);
+            gl.Vertex(-0.7, 1, 0.7);
+            gl.Vertex(0.7, 1, 0.7);
+            gl.Vertex(0.7, 1, -0.7);
+            gl.End();
+            gl.PopMatrix();
+
+            gl.PushMatrix();
+            //Draw disk
+            gl.Color(0.0, 1.0, 1.0);
+            gl.Translate(2.9, m_onTableHeightY+0.6+m_diskOffsetY, 2.5+m_diskOffsetZ);
+            gl.Scale(0.5, 0.5, 0.5);
+            gl.Rotate(-90, 1, 0, 0);
+            disk.CreateInContext(gl);
+            disk.Render(gl, RenderMode.Render);
+            gl.PopMatrix();
 
             DrawText(gl);
 

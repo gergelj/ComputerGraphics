@@ -136,7 +136,7 @@ namespace AssimpSample
             lista = new DisplayList();
             lista.Generate(gl);
             lista.New(gl, DisplayList.DisplayListMode.Compile);
-            gl.Color(0.3f, 0.3f, 0.3f);
+            //gl.Color(0.3f, 0.3f, 0.3f);
             RenderNode(m_scene.RootNode);
             lista.End(gl);
         }

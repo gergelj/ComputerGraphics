@@ -6,6 +6,19 @@
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF" Loaded="Window_Loaded" KeyDown="Window_KeyDown">
     <Grid>
         <DockPanel>
+            <ToolBarTray DockPanel.Dock="Top">
+                <ToolBar HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Label>Disk Y:</Label>
+                    <Label Content="{Binding Path=DiskOffsetY, UpdateSourceTrigger=PropertyChanged}" Width="40"></Label>
+                    <Button Click="IncreaseDiskY">+</Button>
+                    <Button Click="DereaseDiskY">-</Button>
+                    <Separator Margin="10 0"></Separator>
+                    <Label>Disk Z:</Label>
+                    <TextBox Width="40">0</TextBox>
+                    <Button Click="IncreaseDiskZ">+</Button>
+                    <Button Click="DecreaseDiskZ">-</Button>
+                </ToolBar>
+            </ToolBarTray>
         <!-- The OpenGL control provides a OpenGL drawing surface. -->
         <sharpGL:OpenGLControl 
             Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
