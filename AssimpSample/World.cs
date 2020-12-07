@@ -243,14 +243,15 @@ namespace AssimpSample
             gl.Scale(6, 2.0, 3.5);
             gl.Translate(0, m_onTableHeightY, 0);
 
+            gl.Color(0, 0.43, 0.11);
             cube.Render(gl, RenderMode.Render);
 
-            gl.Color(1.0, 0.0, 0.0);
+            gl.Color(0.0, 0.29, 0.56);
             gl.Begin(OpenGL.GL_QUADS);
-            gl.Vertex(-0.7, 1, -0.7);
-            gl.Vertex(-0.7, 1, 0.7);
-            gl.Vertex(0.7, 1, 0.7);
-            gl.Vertex(0.7, 1, -0.7);
+            gl.Vertex(-5, -1, -5);
+            gl.Vertex(-5, -1, 5);
+            gl.Vertex(5, -1, 5);
+            gl.Vertex(5, -1, -5);
             gl.End();
             gl.PopMatrix();
 
@@ -284,6 +285,7 @@ namespace AssimpSample
             gl.DrawText(m_width - 56 - m_textMargin, 20 + m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "_________");
             gl.DrawText(m_width - 64 - m_textMargin, m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Sifra zad: 6.2");
             gl.DrawText(m_width - 64 - m_textMargin, m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "___________");
+            
         }
 
 
