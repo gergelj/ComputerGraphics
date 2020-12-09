@@ -191,22 +191,17 @@ namespace AssimpSample
             gl.LookAt(m_eyeX, m_eyeY, m_eyeZ, m_centerX, m_centerY, m_centerZ, m_upX, m_upY, m_upZ);
             gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-            float[] lineWidthRange = new float[2];
-            float[] lineWidthGranularity = new float[1];
-            gl.GetFloat(OpenGL.GL_LINE_WIDTH_RANGE, lineWidthRange);
-            gl.GetFloat(OpenGL.GL_LINE_WIDTH_GRANULARITY, lineWidthGranularity);
-            float lineWidth = lineWidthRange[0];
-            gl.LineWidth(lineWidth);
-
             m_scene.LoadScene();
             m_scene.Initialize();
 
             cube = new Cube();
-            disk = new Disk();
-            disk.Loops = 120;
-            disk.Slices = 50;
-            disk.InnerRadius = 0.2f;
-            disk.OuterRadius = 1.0f;
+            disk = new Disk
+            {
+                Loops = 120,
+                Slices = 50,
+                InnerRadius = 0.2f,
+                OuterRadius = 1.0f
+            };
 
         }
 
@@ -217,62 +212,60 @@ namespace AssimpSample
         {
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
+            gl.Viewport(0, 0, m_width, m_height);
             gl.MatrixMode(OpenGL.GL_PROJECTION);
             gl.LoadIdentity();
             gl.Perspective(m_fov, (double)m_width / (double)m_height, 1.0, 400.0);
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
-            gl.PushMatrix();
+            gl.LoadIdentity();
 
-            //gl.LookAt(m_eyeX, m_eyeY, m_eyeZ, m_centerX, m_centerY, m_centerZ, m_upX, m_upY, m_upZ);
+                gl.Translate(0.0f, 0.0f, -m_sceneDistance);
+                gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f);
+                gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
 
-            gl.Translate(0.0f, 0.0f, -m_sceneDistance);
-            gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f);
-            gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
-
-            gl.PushMatrix();
-            gl.Translate(1, 0, 0);
-            gl.Rotate(90, 1, 0, 0);
-            gl.Rotate(-90, 0, 0, 1);
-            gl.Scale(5, 5, 5);
-            m_scene.Draw();
-            gl.PopMatrix();
+                gl.PushMatrix();
+                    gl.Translate(1, 0, 0);
+                    gl.Rotate(90, 1, 0, 0);
+                    gl.Rotate(-90, 0, 0, 1);
+                    gl.Scale(5, 5, 5);
+                    m_scene.Draw();  //kompjuter
+                gl.PopMatrix();
 
             //TODO: Draw table, podloga i disk
-            gl.PushMatrix();
-            gl.Scale(6, 2.0, 3.5);
-            gl.Translate(0, m_onTableHeightY, 0);
+                gl.PushMatrix();
+                    gl.Scale(6, 2.0, 3.5);
+                    gl.Translate(0, m_onTableHeightY, 0);
 
-            gl.Color(0, 0.43, 0.11);
-            cube.Render(gl, RenderMode.Render);
+                    gl.Color(0, 0.43, 0.11);
+                    cube.Render(gl, RenderMode.Render);  //sto
 
-            gl.Color(0.0, 0.29, 0.56);
-            gl.Begin(OpenGL.GL_QUADS);
-            gl.Vertex(-5, -1, -5);
-            gl.Vertex(-5, -1, 5);
-            gl.Vertex(5, -1, 5);
-            gl.Vertex(5, -1, -5);
-            gl.End();
-            gl.PopMatrix();
+                    gl.Color(0.0, 0.29, 0.56);
+                    gl.Begin(OpenGL.GL_QUADS); // podloga
+                    gl.Vertex(-5, -1, -5);
+                    gl.Vertex(-5, -1, 5);
+                    gl.Vertex(5, -1, 5);
+                    gl.Vertex(5, -1, -5);
+                    gl.End();
+                gl.PopMatrix();
 
-            gl.PushMatrix();
+                gl.PushMatrix();
             //Draw disk
-            gl.Color(0.0, 1.0, 1.0);
-            gl.Translate(2.9, m_onTableHeightY+0.6+m_diskOffsetY, 2.5+m_diskOffsetZ);
-            gl.Scale(0.5, 0.5, 0.5);
-            gl.Rotate(-90, 1, 0, 0);
-            disk.CreateInContext(gl);
-            disk.Render(gl, RenderMode.Render);
-            gl.PopMatrix();
+                    gl.Color(0.0, 1.0, 1.0);
+                    gl.Translate(2.9, m_onTableHeightY+0.6+m_diskOffsetY, 2.5+m_diskOffsetZ);
+                    gl.Scale(0.5, 0.5, 0.5);
+                    gl.Rotate(-90, 1, 0, 0);
+                    disk.CreateInContext(gl);
+                    disk.Render(gl, RenderMode.Render);
+                gl.PopMatrix();
 
-            DrawText(gl);
-
-            gl.PopMatrix();
+                DrawText(gl);
             gl.Flush();
         }
 
         private void DrawText(OpenGL gl)
         {
+            /*
             gl.Viewport(0, 0, m_width, m_height);
             
             gl.DrawText(m_width - 140 - m_textMargin, 4 * 20 + m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Predmet: Racunarska grafika");
@@ -285,6 +278,19 @@ namespace AssimpSample
             gl.DrawText(m_width - 56 - m_textMargin, 20 + m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "_________");
             gl.DrawText(m_width - 64 - m_textMargin, m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Sifra zad: 6.2");
             gl.DrawText(m_width - 64 - m_textMargin, m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "___________");
+            */
+
+            gl.MatrixMode(OpenGL.GL_PROJECTION);
+            gl.PushMatrix();
+            gl.LoadIdentity();
+            gl.Ortho2D(-1, m_width, -1, m_height);
+            gl.MatrixMode(OpenGL.GL_MODELVIEW);
+            gl.PushMatrix();
+            gl.LoadIdentity();
+            gl.DrawText3D("Arial", 10, 5, 4, "Example Text");
+            gl.PopMatrix();
+            gl.MatrixMode(OpenGL.GL_PROJECTION);
+            gl.PopMatrix();
             
         }
 
@@ -299,7 +305,6 @@ namespace AssimpSample
             gl.Viewport(0, 0, m_width, m_height);
             gl.MatrixMode(OpenGL.GL_PROJECTION);      // selektuj Projection Matrix
             gl.LoadIdentity();
-
             gl.Perspective(m_fov, (float)m_width / m_height, 1.0f, 400.0f);
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
