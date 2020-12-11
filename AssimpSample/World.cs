@@ -84,6 +84,17 @@ namespace AssimpSample
         private double m_diskOffsetY;
         private double m_diskOffsetZ;
 
+        private string[] m_text = new string[] { "Predmet: Racunarska grafika" , "Sk. god: 2020/21." , "Ime: Gergelj" , "Prezime: Kis" , "Sifra zad: 6.2" };
+        private float[] m_textWidth = new float[] { 10.5f, 6.5f, 4.5f, 4.5f, 4.8f};
+        private float m_ortho2dProjection = 10.0f;
+
+        float[] m_shearMatrix = {
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.5f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+         };
+
         #endregion Atributi
 
         #region Properties
@@ -103,7 +114,7 @@ namespace AssimpSample
         public float RotationX
         {
             get { return m_xRotation; }
-            set { Console.WriteLine(m_xRotation);  m_xRotation = value; }
+            set { m_xRotation = value; }
         }
 
         /// <summary>
@@ -212,6 +223,7 @@ namespace AssimpSample
         {
             gl.Clear(OpenGL.GL_COLOR_BUFFER_BIT | OpenGL.GL_DEPTH_BUFFER_BIT);
 
+            gl.FrontFace(OpenGL.GL_CCW);
             gl.Viewport(0, 0, m_width, m_height);
             gl.MatrixMode(OpenGL.GL_PROJECTION);
             gl.LoadIdentity();
@@ -220,19 +232,21 @@ namespace AssimpSample
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
 
+      
                 gl.Translate(0.0f, 0.0f, -m_sceneDistance);
                 gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f);
                 gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
 
+            //Iscrtaj kompjuter
                 gl.PushMatrix();
                     gl.Translate(1, 0, 0);
                     gl.Rotate(90, 1, 0, 0);
                     gl.Rotate(-90, 0, 0, 1);
                     gl.Scale(5, 5, 5);
-                    m_scene.Draw();  //kompjuter
+                    m_scene.Draw();
                 gl.PopMatrix();
 
-            //TODO: Draw table, podloga i disk
+            //Iscrtaj sto i podlogu
                 gl.PushMatrix();
                     gl.Scale(6, 2.0, 3.5);
                     gl.Translate(0, m_onTableHeightY, 0);
@@ -250,7 +264,7 @@ namespace AssimpSample
                 gl.PopMatrix();
 
                 gl.PushMatrix();
-            //Draw disk
+            //Iscrtaj disk
                     gl.Color(0.0, 1.0, 1.0);
                     gl.Translate(2.9, m_onTableHeightY+0.6+m_diskOffsetY, 2.5+m_diskOffsetZ);
                     gl.Scale(0.5, 0.5, 0.5);
@@ -265,9 +279,64 @@ namespace AssimpSample
 
         private void DrawText(OpenGL gl)
         {
-            /*
-            gl.Viewport(0, 0, m_width, m_height);
+            //Draw2DText(gl);
+            DrawProjected3DText(gl); 
+        }
+
+        private void DrawProjected3DText(OpenGL gl)
+        {
+            gl.MatrixMode(OpenGL.GL_PROJECTION);
+            gl.PushMatrix();
+            gl.LoadIdentity();
+            if (m_width <= m_height)
+            {
+                gl.Ortho2D(-m_ortho2dProjection, m_ortho2dProjection, -m_ortho2dProjection * m_height / m_width, m_ortho2dProjection * m_height / m_width);
+            }
+            else
+            {
+                gl.Ortho2D(-m_ortho2dProjection * m_width / m_height, m_ortho2dProjection * m_width / m_height, -m_ortho2dProjection, m_ortho2dProjection);
+            }
+            gl.MatrixMode(OpenGL.GL_MODELVIEW);
+            gl.PushMatrix();
+            gl.LoadIdentity();
+            // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            gl.Color(1.0, 1.0, 0);
+            float ydif = 6.0f;
+            float xdif = -0.5f;
             
+            if (m_width <= m_height)
+                gl.Translate(m_ortho2dProjection + xdif, -m_ortho2dProjection * m_height / m_width + ydif, 0);
+            else
+                gl.Translate(m_ortho2dProjection * m_width / m_height + xdif, -m_ortho2dProjection + ydif, 0);
+
+            for(int i =0; i<m_text.Length; i++)
+            {
+                gl.PushMatrix();
+                gl.Translate(-m_textWidth[i], 0, 0);
+                gl.MultMatrix(m_shearMatrix);
+                gl.DrawText3D("Tahoma", 10, 5, 4, m_text[i]);
+                gl.PopMatrix();
+                gl.Translate(0, -0.2, 0);
+                gl.PushMatrix();
+                gl.Translate(-m_textWidth[i], 0, 0);
+                gl.Begin(OpenGL.GL_LINES);
+                gl.Vertex(0, 0);
+                gl.Vertex(m_textWidth[i], 0);
+                gl.End();
+                gl.PopMatrix();
+                gl.Translate(0, -1, 0);
+            }
+
+            // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            gl.PopMatrix();
+            gl.MatrixMode(OpenGL.GL_PROJECTION);
+            gl.PopMatrix();
+        }
+
+        private void Draw2DText(OpenGL gl)
+        {
+            gl.Viewport(0, 0, m_width, m_height);
+
             gl.DrawText(m_width - 140 - m_textMargin, 4 * 20 + m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Predmet: Racunarska grafika");
             gl.DrawText(m_width - 140 - m_textMargin, 4 * 20 + m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "_______________________");
             gl.DrawText(m_width - 85 - m_textMargin, 3 * 20 + m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Sk. god: 2020/21.");
@@ -278,20 +347,6 @@ namespace AssimpSample
             gl.DrawText(m_width - 56 - m_textMargin, 20 + m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "_________");
             gl.DrawText(m_width - 64 - m_textMargin, m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Sifra zad: 6.2");
             gl.DrawText(m_width - 64 - m_textMargin, m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "___________");
-            */
-
-            gl.MatrixMode(OpenGL.GL_PROJECTION);
-            gl.PushMatrix();
-            gl.LoadIdentity();
-            gl.Ortho2D(-1, m_width, -1, m_height);
-            gl.MatrixMode(OpenGL.GL_MODELVIEW);
-            gl.PushMatrix();
-            gl.LoadIdentity();
-            gl.DrawText3D("Arial", 10, 5, 4, "Example Text");
-            gl.PopMatrix();
-            gl.MatrixMode(OpenGL.GL_PROJECTION);
-            gl.PopMatrix();
-            
         }
 
 
