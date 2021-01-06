@@ -2,25 +2,57 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:AssimpSample"
         Title="SharpGL WPF Application" Height="600" Width="800" 
         xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF" Loaded="Window_Loaded" KeyDown="Window_KeyDown">
     <Grid>
         <DockPanel>
-            <ToolBarTray DockPanel.Dock="Top">
-                <ToolBar HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Label>Disk Y:</Label>
-                    <Label Content="{Binding Path=DiskOffsetY, UpdateSourceTrigger=PropertyChanged}" Width="40"></Label>
-                    <Button Click="IncreaseDiskY">+</Button>
-                    <Button Click="DereaseDiskY">-</Button>
-                    <Separator Margin="10 0"></Separator>
-                    <Label>Disk Z:</Label>
-                    <TextBox Width="40">0</TextBox>
-                    <Button Click="IncreaseDiskZ">+</Button>
-                    <Button Click="DecreaseDiskZ">-</Button>
-                </ToolBar>
-            </ToolBarTray>
+            <StackPanel DockPanel.Dock="Top">
+                <ToolBarTray>
+                    <ToolBar HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Visibility="Collapsed">
+                            <Label>Disk Y:</Label>
+                            <Button Click="DecreaseDiskY" IsEnabled="{Binding Path=IsNotBeingAnimated}">-</Button>
+                            <Label Width="40" Content="{Binding Path=DiskYOffset, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></Label>
+                            <TextBox Width="40" Text="{Binding Path=DiskYOffset, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsEnabled="{Binding Path=IsNotBeingAnimated}"></TextBox>
+                            <Button Click="IncreaseDiskY" IsEnabled="{Binding Path=IsNotBeingAnimated}">+</Button>
+                            <Separator Margin="10 0"></Separator>
+
+                            <Label>Disk Z:</Label>
+                            <Button Click="DecreaseDiskZ" IsEnabled="{Binding Path=IsNotBeingAnimated}">-</Button>
+                            <Label Width="40" Content="{Binding Path=DiskZOffset, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></Label>
+                            <TextBox Width="40" Text="{Binding Path=DiskZOffset, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsEnabled="{Binding Path=IsNotBeingAnimated}"></TextBox>
+                            <Button Click="IncreaseDiskZ" IsEnabled="{Binding Path=IsNotBeingAnimated}">+</Button>
+                            <Separator Margin="10 0"></Separator>
+                        </StackPanel>
+
+                        <Label>Computer X:</Label>
+                        <Button Click="DecreaseComputerX" IsEnabled="{Binding Path=IsNotBeingAnimated}">-</Button>
+                        <Label Width="40" Content="{Binding Path=ComputerXOffset, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></Label>
+                        <TextBox Visibility="Collapsed" Width="40" Text="{Binding Path=ComputerXOffset, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsEnabled="{Binding Path=IsNotBeingAnimated}"></TextBox>
+                        <Button Click="IncreaseComputerX" IsEnabled="{Binding Path=IsNotBeingAnimated}">+</Button>
+                        <Separator Margin="10 0"></Separator>
+
+                        <Label>Computer Scale:</Label>
+                        <Button Click="DecreaseComputerScale" IsEnabled="{Binding Path=IsNotBeingAnimated}">-</Button>
+                        <Label Width="40" Content="{Binding Path=ComputerScaleFactor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"></Label>
+                        <TextBox Visibility="Collapsed" Width="40" Text="{Binding Path=ComputerScaleFactor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsEnabled="{Binding Path=IsNotBeingAnimated}"></TextBox>
+                        <Button Click="IncreaseComputerScale" IsEnabled="{Binding Path=IsNotBeingAnimated}">+</Button>
+
+                        <Separator Margin="10 0"></Separator>
+
+                        <Label>Directional Lighting Ambient</Label>
+                        <Label>R:</Label>
+                        <TextBox Width="40" Text="{Binding Path=LightingAmbientR, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsEnabled="{Binding Path=IsNotBeingAnimated}"></TextBox>
+                        <Label>G:</Label>
+                        <TextBox Width="40" Text="{Binding Path=LightingAmbientG, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsEnabled="{Binding Path=IsNotBeingAnimated}"></TextBox>
+                        <Label>B:</Label>
+                        <TextBox Width="40" Text="{Binding Path=LightingAmbientB, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" IsEnabled="{Binding Path=IsNotBeingAnimated}"></TextBox>
+                    </ToolBar>
+                </ToolBarTray>
+            </StackPanel>
         <!-- The OpenGL control provides a OpenGL drawing surface. -->
-        <sharpGL:OpenGLControl 
+        <sharpGL:OpenGLControl
             Name="openGLControl" OpenGLDraw="openGLControl_OpenGLDraw" 
             OpenGLInitialized="openGLControl_OpenGLInitialized" Resized="openGLControl_Resized"
             DrawFPS="True" RenderContextType="FBO" FrameRate="60"/>

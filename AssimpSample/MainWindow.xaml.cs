@@ -31,8 +31,8 @@ namespace AssimpSample
         /// </summary>
         World m_world = null;
 
-        private double m_diskOffsetY;
-        private double m_diskOffsetZ;
+        //private double m_diskOffsetY = 0;
+        //private double m_diskOffsetZ = 0;
 
         #endregion Atributi
 
@@ -41,11 +41,12 @@ namespace AssimpSample
             get
             {
                 return m_world.DiskOffsetY;
+                //return m_diskOffsetY;
             }
             set 
             {
                 m_world.DiskOffsetY = value;
-                m_diskOffsetY = value;
+                //m_diskOffsetY = value;
                 OnPropertyChanged("DiskYOffset");
             }
         }
@@ -55,13 +56,78 @@ namespace AssimpSample
             get
             {
                 return m_world.DiskOffsetZ;
+                //return m_diskOffsetZ;
             }
             set
             {
                 m_world.DiskOffsetZ = value;
-                m_diskOffsetZ = value;
+                //m_diskOffsetZ = value;
                 OnPropertyChanged("DiskZOffset");
             }
+        }
+
+        public double ComputerXOffset
+        {
+            get
+            {
+                return m_world.ComputerOffsetX;
+            }
+            set
+            {
+                m_world.ComputerOffsetX = value;
+                OnPropertyChanged("ComputerXOffset");
+            }
+        }
+
+        public double ComputerScaleFactor
+        {
+            get
+            {
+                return m_world.ComputerScaleFactor;
+            }
+            set
+            {
+                m_world.ComputerScaleFactor = value;
+                OnPropertyChanged("ComputerScaleFactor");
+            }
+        }
+
+        public float LightingAmbientR
+        {
+            get { return m_world.Light1Ambient[0]; }
+            set
+            {
+                float color = ValidColorValue(value);
+                m_world.SetAmbientLighting(color, 0);
+                OnPropertyChanged("LightingAmbientR");
+            }
+        }
+
+        public float LightingAmbientG
+        {
+            get { return m_world.Light1Ambient[1]; }
+            set
+            {
+                float color = ValidColorValue(value);
+                m_world.SetAmbientLighting(color, 1);
+                OnPropertyChanged("LightingAmbientG");
+            }
+        }
+
+        public float LightingAmbientB
+        {
+            get { return m_world.Light1Ambient[2]; }
+            set
+            {
+                float color = ValidColorValue(value);
+                m_world.SetAmbientLighting(color, 2);
+                OnPropertyChanged("LightingAmbientB");
+            }
+        }
+
+        public Boolean IsNotBeingAnimated
+        {
+            get { return !m_world.IsBeingAnimated; }
         }
 
         #region Konstruktori
@@ -70,6 +136,7 @@ namespace AssimpSample
         {
             // Inicijalizacija komponenti
             InitializeComponent();
+            this.DataContext = this;
 
             // Kreiranje OpenGL sveta
             try
@@ -118,6 +185,9 @@ namespace AssimpSample
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            if (!IsNotBeingAnimated)
+                return;
+
             switch (e.Key)
             {
                 case Key.F10: this.Close(); break;
@@ -155,7 +225,16 @@ namespace AssimpSample
                         }
                     }
                     break;
+                case Key.C:
+                    AnimationHandler animationHandler = new AnimationHandler(m_world, new EventHandler(UpdateAnimationPropery));
+                    animationHandler.Start();
+                    break;
             }
+        }
+
+        public void UpdateAnimationPropery(object sender, EventArgs e)
+        {
+            OnPropertyChanged("IsNotBeingAnimated");
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -168,7 +247,7 @@ namespace AssimpSample
             DiskYOffset += 0.1;
         }
 
-        private void DereaseDiskY(object sender, RoutedEventArgs e)
+        private void DecreaseDiskY(object sender, RoutedEventArgs e)
         {
             DiskYOffset -= 0.1;
         }
@@ -183,14 +262,50 @@ namespace AssimpSample
             DiskZOffset -= 0.1;
         }
 
+        private void IncreaseComputerX(object sender, RoutedEventArgs e)
+        {
+            ComputerXOffset += 0.5;
+        }
+
+        private void DecreaseComputerX(object sender, RoutedEventArgs e)
+        {
+            ComputerXOffset -= 0.5;
+        }
+
+        private void IncreaseComputerScale(object sender, RoutedEventArgs e)
+        {
+            ComputerScaleFactor += 0.1;
+        }
+
+        private void DecreaseComputerScale(object sender, RoutedEventArgs e)
+        {
+            ComputerScaleFactor -= 0.1;
+        }
+        private void SetAmbientLighting(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private float ValidColorValue(float toValidate)
+        {
+            if (toValidate < 0)
+                return 0;
+            else if (toValidate > 1)
+                return 1;
+            else
+                return toValidate;
+        }
+
         #region INotifyPropertyChanged Members
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected void OnPropertyChanged(string name = null)
+        protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
         #endregion
+
     }
 }

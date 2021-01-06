@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------
 using System;
 using Assimp;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using SharpGL.SceneGraph;
@@ -27,6 +28,7 @@ namespace AssimpSample
 
         #region Atributi
 
+        private OpenGL gl;
         /// <summary>
         ///	 Scena koja se prikazuje.
         /// </summary>
@@ -79,21 +81,30 @@ namespace AssimpSample
         private float m_upZ = 0.0f;
 
         private Cube cube;
+        private Cube tray;
         private Disk disk;
 
-        private double m_diskOffsetY;
+        private double m_diskOffsetY = 1.3;
         private double m_diskOffsetZ;
+        private double m_trayOffsetZ;
+
+        private double m_computerOffsetX;
+        private double m_computerScaleFactor = 1;
 
         private string[] m_text = new string[] { "Predmet: Racunarska grafika" , "Sk. god: 2020/21." , "Ime: Gergelj" , "Prezime: Kis" , "Sifra zad: 6.2" };
         private float[] m_textWidth = new float[] { 10.5f, 6.5f, 4.5f, 4.5f, 4.8f};
         private float m_ortho2dProjection = 10.0f;
 
-        float[] m_shearMatrix = {
+        private float[] m_shearMatrix = {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.5f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
          };
+
+        private float[] m_light1ambient = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
+
+        private Boolean m_isBeingAnimated = false;
 
         #endregion Atributi
 
@@ -165,6 +176,43 @@ namespace AssimpSample
             set { m_diskOffsetZ = value; }
         }
 
+        public double TrayOffsetZ
+        {
+            get { return m_trayOffsetZ; }
+            set { m_trayOffsetZ = value; }
+        }
+
+        public double ComputerOffsetX
+        {
+            get { return m_computerOffsetX; }
+            set { m_computerOffsetX = value; }
+        }
+
+        public double ComputerScaleFactor
+        {
+            get { return m_computerScaleFactor; }
+            set
+            {
+                if (value < 0.1)
+                    m_computerScaleFactor = 0.1;
+                else if (value > 2)
+                    m_computerScaleFactor = 2;
+                else
+                    m_computerScaleFactor = value;
+            }
+        }
+
+        public float[] Light1Ambient
+        {
+            get { return m_light1ambient; }
+        }
+
+        public Boolean IsBeingAnimated
+        {
+            get { return m_isBeingAnimated; }
+            set { m_isBeingAnimated = value; }
+        }
+
         #endregion Properties
 
         #region Konstruktori
@@ -177,6 +225,7 @@ namespace AssimpSample
             this.m_scene = new AssimpScene(scenePath, sceneFileName, gl);
             this.m_width = width;
             this.m_height = height;
+            this.gl = gl;
         }
 
         /// <summary>
@@ -200,12 +249,16 @@ namespace AssimpSample
             gl.Enable(OpenGL.GL_CULL_FACE);
 
             gl.LookAt(m_eyeX, m_eyeY, m_eyeZ, m_centerX, m_centerY, m_centerZ, m_upX, m_upY, m_upZ);
-            gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+            SetupMaterials(gl);
+            SetupLighting(gl);
+            SetupTextures(gl);
 
             m_scene.LoadScene();
             m_scene.Initialize();
 
             cube = new Cube();
+            tray = new Cube();
             disk = new Disk
             {
                 Loops = 120,
@@ -213,6 +266,17 @@ namespace AssimpSample
                 InnerRadius = 0.2f,
                 OuterRadius = 1.0f
             };
+
+            disk.NormalGeneration = Normals.Smooth;
+
+            disk.Material = new SharpGL.SceneGraph.Assets.Material();
+            disk.Material.Ambient = Color.FromArgb(32, 64, 64);
+            disk.Material.Diffuse = Color.FromArgb(102, 102, 102);
+            disk.Material.Specular = Color.FromArgb(198, 198, 198);
+            disk.Material.Shininess = 76.8f;
+            disk.Material.Bind(gl);
+
+            gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         }
 
@@ -231,23 +295,46 @@ namespace AssimpSample
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
-
       
                 gl.Translate(0.0f, 0.0f, -m_sceneDistance);
                 gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f);
                 gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
 
-            //Iscrtaj kompjuter
                 gl.PushMatrix();
-                    gl.Translate(1, 0, 0);
-                    gl.Rotate(90, 1, 0, 0);
-                    gl.Rotate(-90, 0, 0, 1);
-                    gl.Scale(5, 5, 5);
-                    m_scene.Draw();
+                    gl.Translate(m_computerOffsetX, 0.0f, 0.0f);
+                    gl.Scale(m_computerScaleFactor, m_computerScaleFactor, m_computerScaleFactor);
+
+                    gl.PushMatrix();
+                        //Iscrtaj kompjuter
+                        gl.Translate(1, 0, 0);
+                        gl.Rotate(90, 1, 0, 0);
+                        gl.Rotate(-90, 0, 0, 1);
+                        gl.Scale(5, 5, 5);
+                        m_scene.Draw();
+                    gl.PopMatrix();
+
+                    gl.PushMatrix();
+                        //Iscrtaj tray
+                        gl.Color(1.0, 0.0, 0.0);
+                        gl.Translate(2.9, m_onTableHeightY + 2.6, 0.75 + /*m_trayOffsetZ*/ m_diskOffsetZ);
+                        gl.Scale(0.55, 0.1, 0.6);
+                        cube.Render(gl, RenderMode.Render);
+                    gl.PopMatrix();
+
+                    gl.PushMatrix();
+                    //Iscrtaj disk
+                        gl.Color(0.0, 1.0, 1.0);
+                        gl.Translate(2.9, m_onTableHeightY + 2.6 + 0.11 + m_diskOffsetY, 0.75 + m_diskOffsetZ);
+                        gl.Scale(0.5, 0.5, 0.5);
+                        gl.Rotate(-90, 1, 0, 0);
+                        disk.CreateInContext(gl);
+                        disk.Render(gl, RenderMode.Render);
+                    gl.PopMatrix();
+
                 gl.PopMatrix();
 
             //Iscrtaj sto i podlogu
-                gl.PushMatrix();
+            gl.PushMatrix();
                     gl.Scale(6, 2.0, 3.5);
                     gl.Translate(0, m_onTableHeightY, 0);
 
@@ -256,6 +343,7 @@ namespace AssimpSample
 
                     gl.Color(0.0, 0.29, 0.56);
                     gl.Begin(OpenGL.GL_QUADS); // podloga
+                    gl.Normal(0.0f, 1.0f, 0.0f);
                     gl.Vertex(-5, -1, -5);
                     gl.Vertex(-5, -1, 5);
                     gl.Vertex(5, -1, 5);
@@ -263,23 +351,13 @@ namespace AssimpSample
                     gl.End();
                 gl.PopMatrix();
 
-                gl.PushMatrix();
-            //Iscrtaj disk
-                    gl.Color(0.0, 1.0, 1.0);
-                    gl.Translate(2.9, m_onTableHeightY+0.6+m_diskOffsetY, 2.5+m_diskOffsetZ);
-                    gl.Scale(0.5, 0.5, 0.5);
-                    gl.Rotate(-90, 1, 0, 0);
-                    disk.CreateInContext(gl);
-                    disk.Render(gl, RenderMode.Render);
-                gl.PopMatrix();
-
                 DrawText(gl);
             gl.Flush();
         }
 
+        #region DrawText
         private void DrawText(OpenGL gl)
         {
-            //Draw2DText(gl);
             DrawProjected3DText(gl); 
         }
 
@@ -304,6 +382,7 @@ namespace AssimpSample
             float ydif = 6.0f;
             float xdif = -0.5f;
             
+            //pracenje ivice prozora
             if (m_width <= m_height)
                 gl.Translate(m_ortho2dProjection + xdif, -m_ortho2dProjection * m_height / m_width + ydif, 0);
             else
@@ -312,14 +391,14 @@ namespace AssimpSample
             for(int i =0; i<m_text.Length; i++)
             {
                 gl.PushMatrix();
-                gl.Translate(-m_textWidth[i], 0, 0);
-                gl.MultMatrix(m_shearMatrix);
+                gl.Translate(-m_textWidth[i], 0, 0); //pomera se od desne ivice prozora za sirinu teksta
+                gl.MultMatrix(m_shearMatrix); //dodajem shear matricu na matricni stek (zbog efekta italic)
                 gl.DrawText3D("Tahoma", 10, 5, 4, m_text[i]);
                 gl.PopMatrix();
                 gl.Translate(0, -0.2, 0);
                 gl.PushMatrix();
                 gl.Translate(-m_textWidth[i], 0, 0);
-                gl.Begin(OpenGL.GL_LINES);
+                gl.Begin(OpenGL.GL_LINES); //iscrtavam liniju ispod teksta
                 gl.Vertex(0, 0);
                 gl.Vertex(m_textWidth[i], 0);
                 gl.End();
@@ -333,26 +412,69 @@ namespace AssimpSample
             gl.PopMatrix();
         }
 
-        private void Draw2DText(OpenGL gl)
+        #endregion DrawText
+        
+        #region Materials
+        private void SetupMaterials(OpenGL gl)
         {
-            gl.Viewport(0, 0, m_width, m_height);
+            gl.ColorMaterial(OpenGL.GL_FRONT, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+            gl.Enable(OpenGL.GL_COLOR_MATERIAL);
+        }
+        #endregion Materials
 
-            gl.DrawText(m_width - 140 - m_textMargin, 4 * 20 + m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Predmet: Racunarska grafika");
-            gl.DrawText(m_width - 140 - m_textMargin, 4 * 20 + m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "_______________________");
-            gl.DrawText(m_width - 85 - m_textMargin, 3 * 20 + m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Sk. god: 2020/21.");
-            gl.DrawText(m_width - 85 - m_textMargin, 3 * 20 + m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "_____________");
-            gl.DrawText(m_width - 59 - m_textMargin, 2 * 20 + m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Ime: Gergelj");
-            gl.DrawText(m_width - 59 - m_textMargin, 2 * 20 + m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "_________");
-            gl.DrawText(m_width - 56 - m_textMargin, 20 + m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Prezime: Kis");
-            gl.DrawText(m_width - 56 - m_textMargin, 20 + m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "_________");
-            gl.DrawText(m_width - 64 - m_textMargin, m_textMargin, 1, 1, 0, "Tahoma", 10.0f, "Sifra zad: 6.2");
-            gl.DrawText(m_width - 64 - m_textMargin, m_textMargin - 2, 1, 1, 0, "Tahoma", 10.0f, "___________");
+
+        #region Lighting
+
+        private void SetupLighting(OpenGL gl)
+        {
+            //float[] global_ambient = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+            //gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
+            float[] light0pos = new float[] { 0.0f, 10.0f, -m_sceneDistance, 1.0f };
+            float[] light0ambient = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+            float[] light0diffuse = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+            float[] light0specular = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_POSITION, light0pos);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_AMBIENT, light0ambient);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_DIFFUSE, light0diffuse);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPECULAR, light0specular);
+            gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPOT_CUTOFF, 180.0f);
+            gl.Enable(OpenGL.GL_LIGHTING);
+            gl.Enable(OpenGL.GL_LIGHT0);
+
+            float[] light1pos = new float[] { 0.0f, 1.0f, -m_sceneDistance, 1.0f };
+            float[] light1diffuse = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
+            float[] light1specular = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_POSITION, light1pos);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_AMBIENT, m_light1ambient);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_DIFFUSE, light1diffuse);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPECULAR, light1specular);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPOT_CUTOFF, 30.0f);
+            //gl.Light(OpenGL.GL_LIGHT0, OpenGL.GL_SPOT_EXPONENT, 15.0f);
+            gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_SPOT_DIRECTION, new float[] { 0.0f, -1.0f, 0.0f });
+            gl.Enable(OpenGL.GL_LIGHT1);
+
+            // Ukljuci automatsku normalizaciju nad normalama
+            gl.Enable(OpenGL.GL_NORMALIZE);
+
         }
 
+        public void SetAmbientLighting(float val, int index)
+        {
+            if(index >= 0 && index <= 2)
+            {
+                if (val < 0)
+                    val = 0;
+                else if (val > 1)
+                    val = 1;
 
-        /// <summary>
-        /// Podesava viewport i projekciju za OpenGL kontrolu.
-        /// </summary>
+                m_light1ambient[index] = val;
+                gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_AMBIENT, m_light1ambient);
+            }
+        }
+
+        #endregion Lighting
         public void Resize(OpenGL gl, int width, int height)
         {
             m_width = width;
@@ -365,6 +487,14 @@ namespace AssimpSample
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();                // resetuj ModelView Matrix
         }
+
+        #region Textures
+        private void SetupTextures(OpenGL gl)
+        {
+
+        }
+        #endregion Textures
+
 
         /// <summary>
         ///  Implementacija IDisposable interfejsa.
