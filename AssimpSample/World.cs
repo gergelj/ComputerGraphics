@@ -15,6 +15,7 @@ using SharpGL.SceneGraph.Primitives;
 using SharpGL.SceneGraph.Quadrics;
 using SharpGL.SceneGraph.Core;
 using SharpGL;
+using System.Drawing.Imaging;
 
 namespace AssimpSample
 {
@@ -104,7 +105,13 @@ namespace AssimpSample
 
         private float[] m_light1ambient = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
 
+        public AnimationHandler animationHandler;
         private Boolean m_isBeingAnimated = false;
+
+        private enum TextureObjects { Wood = 0, Carpet, Screen};
+        private readonly int m_textureCount = Enum.GetNames(typeof(TextureObjects)).Length;
+        private uint[] m_textures = null;
+        private string[] m_textureFiles = { "..//..//images//wood.jpg", "..//..//images//carpet.jpg", "..//..//images//screen.jpg" };
 
         #endregion Atributi
 
@@ -226,6 +233,7 @@ namespace AssimpSample
             this.m_width = width;
             this.m_height = height;
             this.gl = gl;
+            m_textures = new uint[m_textureCount];
         }
 
         /// <summary>
@@ -296,69 +304,15 @@ namespace AssimpSample
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
       
-                gl.Translate(0.0f, 0.0f, -m_sceneDistance);
-                gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f);
-                gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
+            gl.Translate(0.0f, 0.0f, -m_sceneDistance);
+            gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f);
+            gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
 
-                gl.PushMatrix();
-                    gl.Translate(m_computerOffsetX, 0.0f, 0.0f);
-                    gl.Scale(m_computerScaleFactor, m_computerScaleFactor, m_computerScaleFactor);
+            DrawComputer();
+            DrawTableAndGround();
 
-                    gl.PushMatrix();
-                        //Iscrtaj kompjuter
-                        gl.Translate(1, 0, 0);
-                        gl.Rotate(90, 1, 0, 0);
-                        gl.Rotate(-90, 0, 0, 1);
-                        gl.Scale(5, 5, 5);
-                        m_scene.Draw();
-                    gl.PopMatrix();
-
-                    gl.PushMatrix();
-                        //Iscrtaj tray
-                        gl.Color(1.0, 0.0, 0.0);
-                        gl.Translate(2.9, m_onTableHeightY + 2.6, 0.75 + /*m_trayOffsetZ*/ m_diskOffsetZ);
-                        gl.Scale(0.55, 0.1, 0.6);
-                        cube.Render(gl, RenderMode.Render);
-                    gl.PopMatrix();
-
-                    gl.PushMatrix();
-                    //Iscrtaj disk
-                        gl.Color(0.0, 1.0, 1.0);
-                        gl.Translate(2.9, m_onTableHeightY + 2.6 + 0.11 + m_diskOffsetY, 0.75 + m_diskOffsetZ);
-                        gl.Scale(0.5, 0.5, 0.5);
-                        gl.Rotate(-90, 1, 0, 0);
-                        disk.CreateInContext(gl);
-                        disk.Render(gl, RenderMode.Render);
-                    gl.PopMatrix();
-
-                gl.PopMatrix();
-
-            //Iscrtaj sto i podlogu
-            gl.PushMatrix();
-                    gl.Scale(6, 2.0, 3.5);
-                    gl.Translate(0, m_onTableHeightY, 0);
-
-                    gl.Color(0, 0.43, 0.11);
-                    cube.Render(gl, RenderMode.Render);  //sto
-
-                    gl.Color(0.0, 0.29, 0.56);
-                    gl.Begin(OpenGL.GL_QUADS); // podloga
-                    gl.Normal(0.0f, 1.0f, 0.0f);
-                    gl.Vertex(-5, -1, -5);
-                    gl.Vertex(-5, -1, 5);
-                    gl.Vertex(5, -1, 5);
-                    gl.Vertex(5, -1, -5);
-                    gl.End();
-                gl.PopMatrix();
-
-                DrawText(gl);
+            DrawProjected3DText(gl);
             gl.Flush();
-        }
-
-        #region DrawText
-        private void DrawText(OpenGL gl)
-        {
-            DrawProjected3DText(gl); 
         }
 
         private void DrawProjected3DText(OpenGL gl)
@@ -412,8 +366,143 @@ namespace AssimpSample
             gl.PopMatrix();
         }
 
-        #endregion DrawText
-        
+        private void DrawTableAndGround()
+        {
+            gl.PushMatrix();
+
+            gl.Scale(6, 2.0, 3.5);
+            gl.Translate(0, m_onTableHeightY, 0);
+
+            //TABLE
+            gl.Color(0.63, 0.37, 0.06);
+
+            gl.MatrixMode(OpenGL.GL_TEXTURE);
+            gl.PushMatrix();
+            //gl.Scale(5, 5, 5);
+            gl.Rotate(90, 0, 0, 1);
+            gl.Enable(OpenGL.GL_TEXTURE_2D);
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[(int)TextureObjects.Wood]);
+
+            cube.Render(gl, RenderMode.Render);  //sto
+
+            gl.Disable(OpenGL.GL_TEXTURE_2D);
+            gl.PopMatrix();
+
+            //GROUND
+            gl.Color(0.0, 0.29, 0.56);
+
+            gl.MatrixMode(OpenGL.GL_TEXTURE);
+            gl.PushMatrix();
+            gl.Scale(5, 5, 5);
+            gl.Enable(OpenGL.GL_TEXTURE_2D);
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[(int)TextureObjects.Carpet]);
+
+            gl.Begin(OpenGL.GL_QUADS); // podloga
+            gl.Normal(0.0f, 1.0f, 0.0f);
+            gl.TexCoord(0, 0);
+            gl.Vertex(-5, -1, -5);
+            gl.TexCoord(1, 0);
+            gl.Vertex(-5, -1, 5);
+            gl.TexCoord(1, 1);
+            gl.Vertex(5, -1, 5);
+            gl.TexCoord(0, 1);
+            gl.Vertex(5, -1, -5);
+            gl.End();
+
+            gl.Disable(OpenGL.GL_TEXTURE_2D);
+            gl.PopMatrix();
+            
+            gl.MatrixMode(OpenGL.GL_MODELVIEW);
+            gl.PopMatrix();
+        }
+
+        private void DrawComputer()
+        {
+            gl.PushMatrix();
+            gl.Translate(m_computerOffsetX, 0.0f, 0.0f);
+            gl.Scale(m_computerScaleFactor, m_computerScaleFactor, m_computerScaleFactor);
+
+            DrawPC();
+            if(animationHandler == null ? false : animationHandler.IsWorking())
+                DrawScreen();
+            DrawTray();
+            DrawCD();
+
+            gl.PopMatrix();
+        }
+
+        private void DrawPC()
+        {
+            gl.PushMatrix();
+            //Iscrtaj kompjuter
+            gl.Translate(1, 0, 0);
+            gl.Rotate(90, 1, 0, 0);
+            gl.Rotate(-90, 0, 0, 1);
+            gl.Scale(5, 5, 5);
+            m_scene.Draw();
+            gl.PopMatrix();
+        }
+
+        private void DrawScreen()
+        {
+            gl.PushMatrix();
+            gl.Color(1.0, 1.0, 1.0);
+            gl.Scale(2.8, 1.3, 1);
+            gl.Translate(-0.4, 1.2, -1.4);
+
+            gl.MatrixMode(OpenGL.GL_TEXTURE);
+            gl.PushMatrix();
+            //gl.Scale(5, 5, 5);
+            gl.Enable(OpenGL.GL_TEXTURE_2D);
+            gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[(int)TextureObjects.Screen]);
+
+            gl.Begin(OpenGL.GL_QUADS); // podloga
+            gl.Normal(0.0f, 0.0f, 1.0f);
+            gl.TexCoord(0, 0);
+            gl.Vertex(-1, -1, 0);
+            gl.TexCoord(1, 0);
+            gl.Vertex(1, -1, 0);
+            gl.TexCoord(1, 1);
+            gl.Vertex(1, 1, 0);
+            gl.TexCoord(0, 1);
+            gl.Vertex(-1, 1, 0);
+            gl.End();
+
+            gl.Disable(OpenGL.GL_TEXTURE_2D);
+            gl.PopMatrix();
+
+            gl.MatrixMode(OpenGL.GL_MODELVIEW);
+            gl.PopMatrix();
+        }
+
+        private void DrawTray()
+        {
+            gl.PushMatrix();
+            //Iscrtaj tray
+            gl.Color(1.0, 0.0, 0.0);
+            gl.Translate(2.9, m_onTableHeightY + 2.6, 0.75 + m_trayOffsetZ);
+            gl.Scale(0.55, 0.1, 0.6);
+            cube.Render(gl, RenderMode.Render);
+            gl.PopMatrix();
+        }
+
+        private void DrawCD()
+        {
+            gl.PushMatrix();
+            //Iscrtaj disk
+            gl.Color(0.0, 1.0, 1.0);
+            gl.Translate(2.9, m_onTableHeightY + 2.6 + 0.11 + m_diskOffsetY, 0.75 + m_diskOffsetZ);
+            gl.Scale(0.5, 0.5, 0.5);
+            gl.Rotate(-90, 1, 0, 0);
+            disk.CreateInContext(gl);
+            disk.Render(gl, RenderMode.Render);
+            gl.PopMatrix();
+        }
+
+
+
         #region Materials
         private void SetupMaterials(OpenGL gl)
         {
@@ -491,7 +580,34 @@ namespace AssimpSample
         #region Textures
         private void SetupTextures(OpenGL gl)
         {
+            //gl.Enable(OpenGL.GL_TEXTURE_2D);
+            gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
 
+            // Ucitaj slike i kreiraj teksture
+            gl.GenTextures(m_textureCount, m_textures);
+            for (int i = 0; i < m_textureCount; ++i)
+            {
+                // Pridruzi teksturu odgovarajucem identifikatoru
+                gl.BindTexture(OpenGL.GL_TEXTURE_2D, m_textures[i]);
+
+                // Ucitaj sliku i podesi parametre teksture
+                Bitmap image = new Bitmap(m_textureFiles[i]);
+                // rotiramo sliku zbog koordinantog sistema opengl-a
+                image.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+                // RGBA format (dozvoljena providnost slike tj. alfa kanal)
+                BitmapData imageData = image.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                                                      System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                gl.Build2DMipmaps(OpenGL.GL_TEXTURE_2D, (int)OpenGL.GL_RGBA8, image.Width, image.Height, OpenGL.GL_BGRA, OpenGL.GL_UNSIGNED_BYTE, imageData.Scan0);
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, OpenGL.GL_NEAREST);		// Nearest Filtering
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, OpenGL.GL_NEAREST);		// Nearest Filtering
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_S, OpenGL.GL_REPEAT);
+                gl.TexParameter(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_WRAP_T, OpenGL.GL_REPEAT);
+
+                image.UnlockBits(imageData);
+                image.Dispose();
+            }
         }
         #endregion Textures
 

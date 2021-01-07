@@ -18,7 +18,7 @@ namespace AssimpSample
         TRAY_CLOSE_WITHOUT_CD,
         END
     }
-    class AnimationHandler
+    public class AnimationHandler
     {
         private AnimationState state;
         private World world;
@@ -176,20 +176,7 @@ namespace AssimpSample
             }
         }
 
-        /*private void GoToNextState()
-        {
-            switch (this.state)
-            {
-                case AnimationState.READY: this.state = AnimationState.TRAY_OPEN_WITHOUT_CD; break;
-                case AnimationState.TRAY_OPEN_WITHOUT_CD: this.state = AnimationState.CD_IN; break;
-                case AnimationState.CD_IN: this.state = AnimationState.TRAY_CLOSE_WITH_CD; break;
-                case AnimationState.TRAY_CLOSE_WITH_CD: this.state = AnimationState.WORKING; break;
-                case AnimationState.WORKING: this.state = AnimationState.TRAY_OPEN_WITH_CD; break;
-                case AnimationState.TRAY_OPEN_WITH_CD: this.state = AnimationState.CD_OUT; break;
-                case AnimationState.CD_OUT: this.state = AnimationState.TRAY_CLOSE_WITHOUT_CD; break;
-                case AnimationState.TRAY_CLOSE_WITHOUT_CD: this.state = AnimationState.END; break;
-                case AnimationState.END: this.state = AnimationState.END; break;
-            }
-        }*/
+        public Boolean IsWorking() => state == AnimationState.WORKING;
+        
     }
 }

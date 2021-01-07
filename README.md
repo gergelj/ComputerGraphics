@@ -32,9 +32,9 @@ Vreme za izradu predmetnog projekta – faze 1 su dve nedelje. Predmetni projeka
 
 - [x] Uključiti color tracking mehanizam i podesiti da se pozivom metode `glColor` definiše ambijentalna i difuzna komponenta materijala.
 - [x] Definisati tačkasti svetlosni izvor bele boje i pozicionirati ga iznad centra scene (na pozitivnom delu y-ose scene). Svetlosni izvor treba da bude stacionaran (tj. transformacije nad modelom ne utiču na njega). Definisati normale za podlogu. Za *Quadric* objekte podesiti automatsko generisanje normala.
-- [ ] Za teksture podesiti wrapping da bude `GL_REPEAT` po obema osama. Podesiti filtere za teksture tako da se koristi najbliži sused filtriranje. Način stapanja teksture sa materijalom postaviti da bude `GL_MODULATE`.
-- [ ] Stolu pridružiti teksturu drveta. Definisati koordinate tekstura.
-- [ ] Podlozi pridružiti teksturu tepiha (slika koja se koristi je jedan segment tepiha). Pritom obavezno skalirati teksturu (shodno potrebi).Skalirati teksturu korišćenjem Texture matrice.
+- [x] Za teksture podesiti wrapping da bude `GL_REPEAT` po obema osama. Podesiti filtere za teksture tako da se koristi najbliži sused filtriranje. Način stapanja teksture sa materijalom postaviti da bude `GL_MODULATE`.
+- [x] Stolu pridružiti teksturu drveta. Definisati koordinate tekstura.
+- [x] Podlozi pridružiti teksturu tepiha (slika koja se koristi je jedan segment tepiha). Pritom obavezno skalirati teksturu (shodno potrebi).Skalirati teksturu korišćenjem Texture matrice.
 - [x] Pozicionirati kameru, tako da se vide podloga, kao i bočna i zadnja strana aviona. Koristiti `gluLookAt` metodu.
 - [x] Pomoću ugrađenih WPF kontrola, omogućiti sledeće:
     - [x] horizontalnu poziciju računara na stolu,
@@ -42,7 +42,7 @@ Vreme za izradu predmetnog projekta – faze 1 su dve nedelje. Predmetni projeka
     - [x] izbor faktora (uniformnog) skaliranja računara.
 - [x] Omogućiti interakciju sa korisnikom preko tastature: sa `F4` se izlazi iz aplikacije, tasterima `W`/`S` vrši se rotacija za 5 stepeni oko horizontalne ose, tasterima `A`/`D` vrši se rotacija za 5 stepeni oko vertikalne ose, a tasterima `+`/`-` približavanje i udaljavanje centru scene. Ograničiti rotaciju tako da se nikada ne vidi donja strana podloge. Dodatno ograničiti rotaciju oko horizontalne ose tako da scena nikada ne bude prikazana naopako.
 - [x] Definisati reflektorski svetlosni izvor (cut-off=30º) crvene boje iznad računara, usmeren ka računaru.
-- [ ] Način stapanja teksture sa materijalom podloge postaviti na `GL_ADD`.
+- [x] Način stapanja teksture sa materijalom podloge postaviti na `GL_ADD`.
 - [x] Kreirati animaciju ubacivanja CD-a u računar. Animacija treba da sadrži sledeće:
     - CD čitač računara se otvara.
     - CD se nalazi unutar njegovog ležište i polako počinje da usporava rotaciju.
@@ -65,9 +65,9 @@ Vreme za izradu predmetnog projekta - faze 2 su četiri nedelje. Predmetni proje
 
 ## Keyboard shortcuts
 
-- A/D - rotate scene around the vertical axis (Y)
-- W/S - rotate scene around the horizontal axis (X)
-- +/- - Zoom In/Out
-- F4 - close the application
-- F2 - load another model
-- C - begin animation
+- `A`/`D` - rotate scene around the vertical axis (Y)
+- `W`/`S` - rotate scene around the horizontal axis (X)
+- `+`/`-` - Zoom In/Out
+- `F4` - close the application
+- `F2` - load another model
+- `C` - begin animation

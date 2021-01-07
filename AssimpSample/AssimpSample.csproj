@@ -139,6 +139,9 @@
     <Content Include="AssimpLib\AssimpNet.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="images\screen.jpg" />
+    <Resource Include="images\carpet.jpg" />
+    <Resource Include="images\wood.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

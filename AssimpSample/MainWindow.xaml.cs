@@ -226,8 +226,8 @@ namespace AssimpSample
                     }
                     break;
                 case Key.C:
-                    AnimationHandler animationHandler = new AnimationHandler(m_world, new EventHandler(UpdateAnimationPropery));
-                    animationHandler.Start();
+                    m_world.animationHandler = new AnimationHandler(m_world, new EventHandler(UpdateAnimationPropery));
+                    m_world.animationHandler.Start();
                     break;
             }
         }
