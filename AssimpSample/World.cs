@@ -16,6 +16,7 @@ using SharpGL.SceneGraph.Quadrics;
 using SharpGL.SceneGraph.Core;
 using SharpGL;
 using System.Drawing.Imaging;
+using SharpGL.SceneGraph.Cameras;
 
 namespace AssimpSample
 {
@@ -73,9 +74,9 @@ namespace AssimpSample
         private float m_eyeY = 0.0f;
         private float m_eyeZ = 0.0f;
 
-        private float m_centerX = 0.0f;
+        private float m_centerX = 5.0f;
         private float m_centerY = 0.0f;
-        private float m_centerZ = -1.0f;
+        private float m_centerZ = 5.0f;
 
         private float m_upX = 0.0f;
         private float m_upY = 1.0f;
@@ -102,6 +103,8 @@ namespace AssimpSample
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f
          };
+
+        private LookAtCamera lookAtCam;
 
         private float[] m_light1ambient = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
 
@@ -256,8 +259,6 @@ namespace AssimpSample
             gl.Enable(OpenGL.GL_DEPTH_TEST);
             gl.Enable(OpenGL.GL_CULL_FACE);
 
-            gl.LookAt(m_eyeX, m_eyeY, m_eyeZ, m_centerX, m_centerY, m_centerZ, m_upX, m_upY, m_upZ);
-
             SetupMaterials(gl);
             SetupLighting(gl);
             SetupTextures(gl);
@@ -303,10 +304,11 @@ namespace AssimpSample
 
             gl.MatrixMode(OpenGL.GL_MODELVIEW);
             gl.LoadIdentity();
-      
+
             gl.Translate(0.0f, 0.0f, -m_sceneDistance);
             gl.Rotate(m_xRotation, 1.0f, 0.0f, 0.0f);
             gl.Rotate(m_yRotation, 0.0f, 1.0f, 0.0f);
+            gl.LookAt(m_eyeX, m_eyeY, m_eyeZ, m_centerX, m_centerY, m_centerZ, m_upX, m_upY, m_upZ);
 
             DrawComputer();
             DrawTableAndGround();
@@ -378,7 +380,6 @@ namespace AssimpSample
 
             gl.MatrixMode(OpenGL.GL_TEXTURE);
             gl.PushMatrix();
-            //gl.Scale(5, 5, 5);
             gl.Rotate(90, 0, 0, 1);
             gl.Enable(OpenGL.GL_TEXTURE_2D);
             gl.TexEnv(OpenGL.GL_TEXTURE_ENV, OpenGL.GL_TEXTURE_ENV_MODE, OpenGL.GL_MODULATE);
@@ -421,8 +422,8 @@ namespace AssimpSample
         private void DrawComputer()
         {
             gl.PushMatrix();
-            gl.Translate(m_computerOffsetX, 0.0f, 0.0f);
             gl.Scale(m_computerScaleFactor, m_computerScaleFactor, m_computerScaleFactor);
+            gl.Translate(m_computerOffsetX, 0.0f, 0.0f);
 
             DrawPC();
             if(animationHandler == null ? false : animationHandler.IsWorking())
