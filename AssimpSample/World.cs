@@ -276,6 +276,7 @@ namespace AssimpSample
                 OuterRadius = 1.0f
             };
 
+            disk.CreateInContext(gl);
             disk.NormalGeneration = Normals.Smooth;
 
             disk.Material = new SharpGL.SceneGraph.Assets.Material();
@@ -335,6 +336,7 @@ namespace AssimpSample
             gl.LoadIdentity();
             // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             gl.Color(1.0, 1.0, 0);
+            gl.Disable(OpenGL.GL_LIGHTING);
             float ydif = 6.0f;
             float xdif = -0.5f;
             
@@ -363,6 +365,7 @@ namespace AssimpSample
             }
 
             // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            gl.Enable(OpenGL.GL_LIGHTING);
             gl.PopMatrix();
             gl.MatrixMode(OpenGL.GL_PROJECTION);
             gl.PopMatrix();
@@ -391,7 +394,7 @@ namespace AssimpSample
             gl.PopMatrix();
 
             //GROUND
-            gl.Color(0.0, 0.29, 0.56);
+            gl.Color(0.18, 0.24, 0.52);
 
             gl.MatrixMode(OpenGL.GL_TEXTURE);
             gl.PushMatrix();
@@ -497,7 +500,8 @@ namespace AssimpSample
             gl.Translate(2.9, m_onTableHeightY + 2.6 + 0.11 + m_diskOffsetY, 0.75 + m_diskOffsetZ);
             gl.Scale(0.5, 0.5, 0.5);
             gl.Rotate(-90, 1, 0, 0);
-            disk.CreateInContext(gl);
+            //disk.CreateInContext(gl);
+            disk.Material.Bind(gl);
             disk.Render(gl, RenderMode.Render);
             gl.PopMatrix();
         }
@@ -517,8 +521,8 @@ namespace AssimpSample
 
         private void SetupLighting(OpenGL gl)
         {
-            //float[] global_ambient = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
-            //gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
+            float[] global_ambient = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+            gl.LightModel(OpenGL.GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
             float[] light0pos = new float[] { 0.0f, 10.0f, -m_sceneDistance, 1.0f };
             float[] light0ambient = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -533,7 +537,7 @@ namespace AssimpSample
             gl.Enable(OpenGL.GL_LIGHTING);
             gl.Enable(OpenGL.GL_LIGHT0);
 
-            float[] light1pos = new float[] { 0.0f, 1.0f, -m_sceneDistance, 1.0f };
+            float[] light1pos = new float[] { 0.0f, 20f, -m_sceneDistance, 1.0f };
             float[] light1diffuse = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
             float[] light1specular = new float[] { 1.0f, 0.0f, 0.0f, 1.0f };
             gl.Light(OpenGL.GL_LIGHT1, OpenGL.GL_POSITION, light1pos);
