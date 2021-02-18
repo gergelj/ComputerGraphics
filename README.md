@@ -35,7 +35,7 @@ Vreme za izradu predmetnog projekta – faze 1 su dve nedelje. Predmetni projeka
 - [x] Za teksture podesiti wrapping da bude `GL_REPEAT` po obema osama. Podesiti filtere za teksture tako da se koristi najbliži sused filtriranje. Način stapanja teksture sa materijalom postaviti da bude `GL_MODULATE`.
 - [x] Stolu pridružiti teksturu drveta. Definisati koordinate tekstura.
 - [x] Podlozi pridružiti teksturu tepiha (slika koja se koristi je jedan segment tepiha). Pritom obavezno skalirati teksturu (shodno potrebi).Skalirati teksturu korišćenjem Texture matrice.
-- [x] Pozicionirati kameru, tako da se vide podloga, kao i bočna i zadnja strana aviona. Koristiti `gluLookAt` metodu.
+- [x] Pozicionirati kameru, tako da se vide podloga, kao i bočna i zadnja strana stola. Koristiti `gluLookAt` metodu.
 - [x] Pomoću ugrađenih WPF kontrola, omogućiti sledeće:
     - [x] horizontalnu poziciju računara na stolu,
     - [x] izbor ambijentalne komponente reflektorskog izvora svetlosti, i
